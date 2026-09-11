@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, render_template, request
 
 from config import HIGHLIGHT_COLORS, MAX_KEYWORD_LENGTH, MAX_LABEL_LENGTH, MAX_TEXT_LENGTH
-from database import create_rule, get_all_rules, init_db
+from database import create_rule, get_all_rules, get_enabled_rules, init_db
+from matcher import build_summary, process_text
 
 app = Flask(__name__)
 
@@ -36,7 +37,17 @@ def add_rule():
         color=data.get("color"),
         label=data.get("label"),
     )
-    return jsonify(rule), 201
+        return jsonify(rule), 201
+
+
+@app.route("/api/process", methods=["POST"])
+def process():
+    data = request.get_json(silent=True) or {}
+    text = data.get("text", "")
+    # Validation is added in Stage 10
+    rules = get_enabled_rules()
+    pieces = process_text(text, rules)
+    return jsonify({"pieces": pieces, "summary": build_summary(pieces, rules)})
 
 
 if __name__ == "__main__":

@@ -60,3 +60,13 @@ def create_rule(keyword, match_type, action_type, color, label):
     row = connection.execute("SELECT * FROM rules WHERE id = ?", (cursor.lastrowid,)).fetchone()
     connection.close()
     return row_to_dict(row)
+
+
+
+
+def get_enabled_rules():
+    """Return only enabled rules, oldest first (used when processing text)."""
+    connection = get_connection()
+    rows = connection.execute("SELECT * FROM rules WHERE enabled = 1 ORDER BY id").fetchall()
+    connection.close()
+    return [row_to_dict(row) for row in rows]
