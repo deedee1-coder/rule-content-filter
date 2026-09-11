@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 
+from config import HIGHLIGHT_COLORS, MAX_KEYWORD_LENGTH, MAX_LABEL_LENGTH, MAX_TEXT_LENGTH
 from database import create_rule, get_all_rules, init_db
 
 app = Flask(__name__)
@@ -10,7 +11,13 @@ init_db()
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+        return render_template(
+        "index.html",
+        colors=HIGHLIGHT_COLORS,
+        max_keyword_length=MAX_KEYWORD_LENGTH,
+        max_label_length=MAX_LABEL_LENGTH,
+        max_text_length=MAX_TEXT_LENGTH,
+    )
 
 
 @app.route("/api/rules", methods=["GET"])

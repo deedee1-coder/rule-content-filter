@@ -4,9 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule-Based Content Filter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Rule-Based Content Filter</h1>
-    <p>Setup works. The real layout comes in Stage 5.</p>
+    <header class="app-header">
+        <div class="app-header__inner">
+            <div>
+                <h1>Rule-Based Content Filter</h1>
+                <p class="subtitle">Create rules, then process text to highlight and label matching words.</p>
+            </div>
+            <p id="rule-count" class="rule-count">0 rules saved</p>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Left panel: rule management -->
+        <section class="panel" aria-labelledby="rules-heading">
+            <h2 id="rules-heading">Rule management</h2>
+
+            <h3>Saved rules</h3>
+            <div class="table-wrap">
+                <table class="rules-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Keyword</th>
+                            <th scope="col">Match</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Style</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rules-table-body"></tbody>
+                </table>
+            </div>
+            <p id="rules-empty" class="empty-state">No rules yet. Create your first rule below.</p>
+
+            <h3>New rule</h3>
+            <form id="rule-form" class="rule-form">
+                <div class="field">
+                    <label for="keyword">Keyword</label>
+                    <input type="text" id="keyword" name="keyword" maxlength="{{ max_keyword_length }}" placeholder="e.g. urgent">
+                </div>
+
+                <div class="field">
+                    <label for="match-type">Match type</label>
+                    <select id="match-type" name="match_type">
+                        <option value="contains">Contains</option>
+                        <option value="startsWith">Starts with</option>
+                        <option value="exact">Exact match</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="action-type">Action</label>
+                    <select id="action-type" name="action_type">
+                        <option value="highlight">Highlight</option>
+                        <option value="tooltip">Tooltip label</option>
+                    </select>
+                </div>
+
+                <fieldset id="color-field" class="field">
+                    <legend>Color</legend>
+                    <div class="swatches">
+                        {% for name, hex in colors.items() %}
+                        <label class="swatch-option" title="{{ name }}">
+                            <input type="radio" name="color" value="{{ hex }}" {% if loop.first %}checked{% endif %}>
+                            <span class="swatch" style="background-color: {{ hex }}"></span>
+                            <span class="visually-hidden">{{ name }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <div id="label-field" class="field" hidden>
+                    <label for="label">Label</label>
+                    <input type="text" id="label" name="label" maxlength="{{ max_label_length }}" placeholder="e.g. IMPORTANT">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="button">Save rule</button>
+                    <p id="rule-message" class="message" role="status"></p>
+                </div>
+            </form>
+        </section>
+
+        <!-- Right panel: text processing -->
+        <section class="panel" aria-labelledby="text-heading">
+            <h2 id="text-heading">Text processing</h2>
+
+            <div class="field">
+                <label for="input-text">Input text</label>
+                <textarea id="input-text" rows="7" maxlength="{{ max_text_length }}" placeholder="Paste or type the text you want to check."></textarea>
+            </div>
+
+            <div class="form-actions form-actions--split">
+                <p id="process-message" class="message" role="status"></p>
+                <span id="char-count" class="char-count">0 / {{ max_text_length }}</span>
+                <button type="button" id="process-button" class="button">Process text</button>
+            </div>
+
+            <h3>Result</h3>
+            <div id="result-output" class="result-output">
+                <p class="empty-state">Processed text will appear here.</p>
+            </div>
+            <div id="summary" class="summary" hidden></div>
+        </section>
+    </main>
 </body>
 </html>

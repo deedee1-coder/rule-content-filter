@@ -1,0 +1,351 @@
+/* ---------- Colors and shared values ---------- */
+:root {
+    --color-page: #f4f6f9;
+    --color-surface: #ffffff;
+    --color-border: #dde2ea;
+    --color-text: #1d2433;
+    --color-muted: #5e6778;
+    --color-accent: #2f55d4;
+    --color-accent-dark: #2444ad;
+    --color-success: #1d7a45;
+    --color-error: #b3261e;
+    --color-tag-bg: #fdefc3;
+    --color-tag-text: #7a4b00;
+    --radius: 8px;
+}
+
+/* ---------- Base ---------- */
+* {
+    box-sizing: border-box;
+}
+
+/* Make sure the hidden attribute always hides, even on elements we style with display */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text);
+    background: var(--color-page);
+}
+
+h1, h2, h3 {
+    margin: 0;
+    line-height: 1.25;
+}
+
+h1 {
+    font-size: 1.35rem;
+    font-weight: 650;
+}
+
+h2 {
+    font-size: 1.1rem;
+    font-weight: 650;
+    margin-bottom: 1.25rem;
+}
+
+h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    margin: 1.75rem 0 0.6rem;
+}
+
+h2 + h3 {
+    margin-top: 0;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.app-header__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.subtitle {
+    margin: 0.2rem 0 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.rule-count {
+    margin: 0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: #eef2fb;
+    color: var(--color-accent-dark);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ---------- Two-panel layout ---------- */
+.layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.panel {
+    min-width: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+
+/* Stack the panels on narrow screens */
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Rules table ---------- */
+.table-wrap {
+    overflow-x: auto;
+}
+
+.rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.rules-table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-muted);
+    background: #f8f9fb;
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.rules-table td {
+    padding: 0.6rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.rules-table td:first-child {
+    font-weight: 600;
+}
+
+.empty-state {
+    margin: 0.75rem 0 0;
+    padding: 1rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-muted);
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Color dot and label badge (used in the table and results) */
+.swatch {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    vertical-align: middle;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    background: var(--color-tag-bg);
+    color: var(--color-tag-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* ---------- Form ---------- */
+.rule-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.field {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+label,
+legend {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+legend {
+    padding: 0;
+}
+
+input[type="text"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    color: inherit;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 9rem;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+}
+
+/* Color picker: real radio buttons, visually replaced by color dots */
+.swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+}
+
+.swatch-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.swatch-option input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.swatch-option .swatch {
+    width: 2rem;
+    height: 2rem;
+}
+
+.swatch-option input:checked + .swatch {
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
+}
+
+.swatch-option input:focus-visible + .swatch {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 5px;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- Buttons and messages ---------- */
+.button {
+    padding: 0.6rem 1.1rem;
+    font: inherit;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--color-accent);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: var(--color-accent-dark);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.form-actions--split {
+    margin-top: 0.75rem;
+    justify-content: flex-end;
+}
+
+.form-actions--split .message {
+    margin-right: auto;
+}
+
+.char-count {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.message {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.message--success {
+    color: var(--color-success);
+}
+
+.message--error {
+    color: var(--color-error);
+}
+
+/* ---------- Result ---------- */
+.result-output {
+    min-height: 8rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: #fbfcfd;
+    line-height: 1.9;
+}
+
+.result-output .empty-state {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+}
+
+.summary {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
