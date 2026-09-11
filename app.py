@@ -37,7 +37,7 @@ def add_rule():
         color=data.get("color"),
         label=data.get("label"),
     )
-        return jsonify(rule), 201
+    return jsonify(rule), 201
 
 
 @app.route("/api/process", methods=["POST"])
