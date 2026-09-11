@@ -11,7 +11,7 @@ init_db()
 
 @app.route("/")
 def home():
-        return render_template(
+    return render_template(
         "index.html",
         colors=HIGHLIGHT_COLORS,
         max_keyword_length=MAX_KEYWORD_LENGTH,
