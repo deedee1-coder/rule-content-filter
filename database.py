@@ -26,3 +26,37 @@ def init_db():
     """)
     connection.commit()
     connection.close()
+
+
+def row_to_dict(row):
+    """Convert a database row into a plain dictionary that Flask can send as JSON."""
+    return {
+        "id": row["id"],
+        "keyword": row["keyword"],
+        "match_type": row["match_type"],
+        "action_type": row["action_type"],
+        "color": row["color"],
+        "label": row["label"],
+        "enabled": bool(row["enabled"]),
+    }
+
+
+def get_all_rules():
+    """Return every rule, oldest first."""
+    connection = get_connection()
+    rows = connection.execute("SELECT * FROM rules ORDER BY id").fetchall()
+    connection.close()
+    return [row_to_dict(row) for row in rows]
+
+
+def create_rule(keyword, match_type, action_type, color, label):
+    """Save a new rule and return it (including its new id)."""
+    connection = get_connection()
+    cursor = connection.execute(
+        "INSERT INTO rules (keyword, match_type, action_type, color, label) VALUES (?, ?, ?, ?, ?)",
+        (keyword, match_type, action_type, color, label),
+    )
+    connection.commit()
+    row = connection.execute("SELECT * FROM rules WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    connection.close()
+    return row_to_dict(row)
