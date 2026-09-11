@@ -97,3 +97,18 @@ def delete_rule(rule_id):
     connection.commit()
     connection.close()
     return cursor.rowcount > 0
+
+
+
+
+def set_rule_enabled(rule_id, enabled):
+    """Turn a rule on or off. Returns the updated rule, or None if no rule had that id."""
+    connection = get_connection()
+    connection.execute("UPDATE rules SET enabled = ? WHERE id = ?", (1 if enabled else 0, rule_id))
+    connection.commit()
+    row = connection.execute("SELECT * FROM rules WHERE id = ?", (rule_id,)).fetchone()
+    connection.close()
+
+    if row is None:
+        return None
+    return row_to_dict(row)

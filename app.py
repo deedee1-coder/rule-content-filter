@@ -1,7 +1,15 @@
 from flask import Flask, jsonify, render_template, request
 
 from config import HIGHLIGHT_COLORS, MAX_KEYWORD_LENGTH, MAX_LABEL_LENGTH, MAX_TEXT_LENGTH
-from database import create_rule, delete_rule, get_all_rules, get_enabled_rules, init_db, rule_exists
+from database import (
+    create_rule,
+    delete_rule,
+    get_all_rules,
+    get_enabled_rules,
+    init_db,
+    rule_exists,
+    set_rule_enabled,
+)
 from matcher import build_summary, process_text
 from validation import validate_rule, validate_text
 
@@ -44,6 +52,17 @@ def add_rule():
         label=rule["label"],
     )
     return jsonify(new_rule), 201
+
+@app.route("/api/rules/<int:rule_id>", methods=["PATCH"])
+def update_rule_enabled(rule_id):
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get("enabled"), bool):
+        return jsonify({"error": "Enabled must be true or false."}), 400
+
+    rule = set_rule_enabled(rule_id, data["enabled"])
+    if rule is None:
+        return jsonify({"error": "Rule not found."}), 404
+    return jsonify(rule), 200
 
 
 @app.route("/api/rules/<int:rule_id>", methods=["DELETE"])

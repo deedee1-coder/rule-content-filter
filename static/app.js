@@ -73,6 +73,21 @@ async function getErrorMessage(response, fallback) {
     }
 }
 
+function createEnabledCell(rule) {
+    const cell = document.createElement("td");
+    cell.className = "cell-toggle";
+
+    const toggle = document.createElement("input");
+    toggle.type = "checkbox";
+    toggle.className = "toggle";
+    toggle.checked = rule.enabled;
+    toggle.setAttribute("aria-label", `Enable rule ${rule.keyword}`);
+    toggle.addEventListener("change", () => setRuleEnabled(rule, toggle));
+
+    cell.appendChild(toggle);
+    return cell;
+}
+
 function createDeleteCell(rule) {
     const cell = document.createElement("td");
     cell.className = "cell-actions";
@@ -97,16 +112,25 @@ function renderRules(rules) {
 
     for (const rule of rules) {
         const row = document.createElement("tr");
+        if (!rule.enabled) {
+            row.className = "is-disabled";
+        }
         row.appendChild(createCell(rule.keyword));
         row.appendChild(createCell(MATCH_TYPE_NAMES[rule.match_type]));
         row.appendChild(createCell(ACTION_TYPE_NAMES[rule.action_type]));
         row.appendChild(createStyleCell(rule));
+        row.appendChild(createEnabledCell(rule));
         row.appendChild(createDeleteCell(rule));
         rulesTableBody.appendChild(row);
     }
 
     rulesEmpty.hidden = rules.length > 0;
-    ruleCount.textContent = rules.length === 1 ? "1 rule saved" : `${rules.length} rules saved`;
+
+    const enabledCount = rules.filter((rule) => rule.enabled).length;
+    ruleCount.textContent = `${plural(rules.length, "rule")} saved`;
+    if (enabledCount < rules.length) {
+        ruleCount.textContent += `, ${enabledCount} enabled`;
+    }
 }
 
 async function loadRules() {
@@ -120,6 +144,33 @@ async function loadRules() {
         renderRules(rules);
     } catch (error) {
         showMessage(rulesMessage, "Could not load rules from the server.", "error");
+    }
+}
+
+async function setRuleEnabled(rule, toggle) {
+    const enabled = toggle.checked;
+    toggle.disabled = true; // prevent double clicks while waiting
+
+    try {
+        const response = await fetch(`/api/rules/${rule.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ enabled: enabled }),
+        });
+
+        if (!response.ok) {
+            toggle.checked = !enabled; // put the switch back
+            showMessage(rulesMessage, await getErrorMessage(response, "Could not update the rule."), "error");
+            return;
+        }
+
+        showMessage(rulesMessage, `Rule "${rule.keyword}" ${enabled ? "enabled" : "disabled"}.`, "success");
+        await loadRules();
+    } catch (error) {
+        toggle.checked = !enabled;
+        showMessage(rulesMessage, "Could not reach the server.", "error");
+    } finally {
+        toggle.disabled = false;
     }
 }
 
@@ -265,7 +316,7 @@ function renderSummary(summary) {
     summaryBox.appendChild(heading);
 
     if (summary.rules_checked === 0) {
-        heading.textContent = "No saved rules to apply. Create a rule first.";
+        heading.textContent = "No enabled rules to apply. Create or enable a rule first.";
         return;
     }
 
