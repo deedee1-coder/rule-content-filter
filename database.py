@@ -70,3 +70,20 @@ def get_enabled_rules():
     rows = connection.execute("SELECT * FROM rules WHERE enabled = 1 ORDER BY id").fetchall()
     connection.close()
     return [row_to_dict(row) for row in rows]
+
+
+
+def rule_exists(keyword, match_type, action_type):
+    """
+    Check whether a rule with the same keyword (ignoring upper/lower case),
+    match type, and action already exists.
+    The keyword is compared in Python because SQLite's LOWER() only handles English letters.
+    """
+    for rule in get_all_rules():
+        if (
+            rule["keyword"].lower() == keyword.lower()
+            and rule["match_type"] == match_type
+            and rule["action_type"] == action_type
+        ):
+            return True
+    return False

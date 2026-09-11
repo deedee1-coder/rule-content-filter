@@ -11,6 +11,7 @@ const labelField = document.getElementById("label-field");
 const labelInput = document.getElementById("label");
 const ruleMessage = document.getElementById("rule-message");
 const inputText = document.getElementById("input-text");
+const charCount = document.getElementById("char-count");
 const processButton = document.getElementById("process-button");
 const processMessage = document.getElementById("process-message");
 const resultOutput = document.getElementById("result-output");
@@ -61,6 +62,16 @@ function createStyleCell(rule) {
     return cell;
 }
 
+// Read the error message sent by the backend, e.g. {"error": "Keyword is required."}
+async function getErrorMessage(response, fallback) {
+    try {
+        const data = await response.json();
+        return data.error || fallback;
+    } catch (error) {
+        return fallback; // the response was not JSON
+    }
+}
+
 function plural(count, word) {
     return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
@@ -84,6 +95,10 @@ function renderRules(rules) {
 async function loadRules() {
     try {
         const response = await fetch("/api/rules");
+        if (!response.ok) {
+            showMessage(ruleMessage, "Could not load rules from the server.", "error");
+            return;
+        }
         const rules = await response.json();
         renderRules(rules);
     } catch (error) {
@@ -113,6 +128,23 @@ async function saveRule(event) {
         label: actionType === "tooltip" ? labelInput.value.trim() : null,
     };
 
+    // Quick checks in the browser; the backend checks everything again
+    if (!newRule.keyword) {
+        showMessage(ruleMessage, "Keyword is required.", "error");
+        keywordInput.focus();
+        return;
+    }
+    if (/\s/.test(newRule.keyword)) {
+        showMessage(ruleMessage, "Keyword must be a single word.", "error");
+        keywordInput.focus();
+        return;
+    }
+    if (actionType === "tooltip" && !newRule.label) {
+        showMessage(ruleMessage, "Label is required for tooltip rules.", "error");
+        labelInput.focus();
+        return;
+    }
+
     try {
         const response = await fetch("/api/rules", {
             method: "POST",
@@ -121,7 +153,7 @@ async function saveRule(event) {
         });
 
         if (!response.ok) {
-            showMessage(ruleMessage, "Could not save the rule.", "error");
+            showMessage(ruleMessage, await getErrorMessage(response, "Could not save the rule."), "error");
             return;
         }
 
@@ -232,8 +264,19 @@ function renderSummary(summary) {
     summaryBox.appendChild(list);
 }
 
+function updateCharCount() {
+    charCount.textContent = `${inputText.value.length} / ${inputText.maxLength}`;
+}
+
 async function processText() {
     processMessage.textContent = "";
+
+    if (!inputText.value.trim()) {
+        showMessage(processMessage, "Please enter some text to process.", "error");
+        inputText.focus();
+        return;
+    }
+
     processButton.disabled = true; // prevent double clicks while waiting
 
     try {
@@ -244,7 +287,7 @@ async function processText() {
         });
 
         if (!response.ok) {
-            showMessage(processMessage, "Could not process the text.", "error");
+            showMessage(processMessage, await getErrorMessage(response, "Could not process the text."), "error");
             return;
         }
 
@@ -262,6 +305,8 @@ async function processText() {
 actionTypeSelect.addEventListener("change", updateActionFields);
 ruleForm.addEventListener("submit", saveRule);
 processButton.addEventListener("click", processText);
+inputText.addEventListener("input", updateCharCount);
 
 updateActionFields();
+updateCharCount();
 loadRules();

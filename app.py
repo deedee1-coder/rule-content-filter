@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, render_template, request
 
 from config import HIGHLIGHT_COLORS, MAX_KEYWORD_LENGTH, MAX_LABEL_LENGTH, MAX_TEXT_LENGTH
-from database import create_rule, get_all_rules, get_enabled_rules, init_db
+from database import create_rule, get_all_rules, get_enabled_rules, init_db, rule_exists
 from matcher import build_summary, process_text
+from validation import validate_rule, validate_text
 
 app = Flask(__name__)
 
@@ -28,23 +29,29 @@ def list_rules():
 
 @app.route("/api/rules", methods=["POST"])
 def add_rule():
-    data = request.get_json(silent=True) or {}
-    # Validation is added in Stage 10
-    rule = create_rule(
-        keyword=data.get("keyword"),
-        match_type=data.get("match_type"),
-        action_type=data.get("action_type"),
-        color=data.get("color"),
-        label=data.get("label"),
+    rule, error = validate_rule(request.get_json(silent=True))
+    if error:
+        return jsonify({"error": error}), 400
+
+    if rule_exists(rule["keyword"], rule["match_type"], rule["action_type"]):
+        return jsonify({"error": "This rule already exists."}), 409
+
+    new_rule = create_rule(
+        keyword=rule["keyword"],
+        match_type=rule["match_type"],
+        action_type=rule["action_type"],
+        color=rule["color"],
+        label=rule["label"],
     )
-    return jsonify(rule), 201
+    return jsonify(new_rule), 201
 
 
 @app.route("/api/process", methods=["POST"])
 def process():
-    data = request.get_json(silent=True) or {}
-    text = data.get("text", "")
-    # Validation is added in Stage 10
+    text, error = validate_text(request.get_json(silent=True))
+    if error:
+        return jsonify({"error": error}), 400
+
     rules = get_enabled_rules()
     pieces = process_text(text, rules)
     return jsonify({"pieces": pieces, "summary": build_summary(pieces, rules)})
