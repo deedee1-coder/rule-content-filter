@@ -87,3 +87,13 @@ def rule_exists(keyword, match_type, action_type):
         ):
             return True
     return False
+
+
+
+def delete_rule(rule_id):
+    """Delete a rule. Returns True if it was deleted, False if no rule had that id."""
+    connection = get_connection()
+    cursor = connection.execute("DELETE FROM rules WHERE id = ?", (rule_id,))
+    connection.commit()
+    connection.close()
+    return cursor.rowcount > 0

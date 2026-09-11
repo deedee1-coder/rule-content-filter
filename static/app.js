@@ -2,6 +2,7 @@
 const ruleCount = document.getElementById("rule-count");
 const rulesTableBody = document.getElementById("rules-table-body");
 const rulesEmpty = document.getElementById("rules-empty");
+const rulesMessage = document.getElementById("rules-message");
 const ruleForm = document.getElementById("rule-form");
 const keywordInput = document.getElementById("keyword");
 const matchTypeSelect = document.getElementById("match-type");
@@ -72,6 +73,21 @@ async function getErrorMessage(response, fallback) {
     }
 }
 
+function createDeleteCell(rule) {
+    const cell = document.createElement("td");
+    cell.className = "cell-actions";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "button-link";
+    button.textContent = "Delete";
+    button.setAttribute("aria-label", `Delete rule ${rule.keyword}`);
+    button.addEventListener("click", () => deleteRule(rule));
+
+    cell.appendChild(button);
+    return cell;
+}
+
 function plural(count, word) {
     return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
@@ -85,6 +101,7 @@ function renderRules(rules) {
         row.appendChild(createCell(MATCH_TYPE_NAMES[rule.match_type]));
         row.appendChild(createCell(ACTION_TYPE_NAMES[rule.action_type]));
         row.appendChild(createStyleCell(rule));
+        row.appendChild(createDeleteCell(rule));
         rulesTableBody.appendChild(row);
     }
 
@@ -96,13 +113,33 @@ async function loadRules() {
     try {
         const response = await fetch("/api/rules");
         if (!response.ok) {
-            showMessage(ruleMessage, "Could not load rules from the server.", "error");
+            showMessage(rulesMessage, "Could not load rules from the server.", "error");
             return;
         }
         const rules = await response.json();
         renderRules(rules);
     } catch (error) {
-        showMessage(ruleMessage, "Could not load rules from the server.", "error");
+        showMessage(rulesMessage, "Could not load rules from the server.", "error");
+    }
+}
+
+async function deleteRule(rule) {
+    if (!confirm(`Delete the rule "${rule.keyword}"?`)) {
+        return; // the user clicked Cancel
+    }
+
+    try {
+        const response = await fetch(`/api/rules/${rule.id}`, { method: "DELETE" });
+
+        if (!response.ok) {
+            showMessage(rulesMessage, await getErrorMessage(response, "Could not delete the rule."), "error");
+            return;
+        }
+
+        showMessage(rulesMessage, `Rule "${rule.keyword}" deleted.`, "success");
+        await loadRules();
+    } catch (error) {
+        showMessage(rulesMessage, "Could not reach the server.", "error");
     }
 }
 
