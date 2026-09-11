@@ -349,3 +349,63 @@ textarea:focus-visible,
     margin-top: 1rem;
     font-size: 0.9rem;
 }
+
+
+.result-text {
+    white-space: pre-wrap; /* keep the user's line breaks and spaces */
+    overflow-wrap: anywhere;
+}
+
+.match {
+    cursor: help;
+}
+
+.match-highlight {
+    padding: 0.1rem 0.15rem;
+    border-radius: 3px;
+}
+
+.match-underline {
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+}
+
+.match-tag {
+    margin-left: 0.25rem;
+    vertical-align: 0.1em;
+}
+
+/* ---------- Summary ---------- */
+.summary-heading {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.summary-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.summary-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.summary-list .swatch {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.summary-list .is-unmatched {
+    color: var(--color-muted);
+}
+
+.summary-count {
+    margin-left: auto;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
