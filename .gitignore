@@ -1,0 +1,9 @@
+# Virtual environment (rebuilt from requirements.txt)
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# SQLite database (the app creates it automatically)
+*.db
